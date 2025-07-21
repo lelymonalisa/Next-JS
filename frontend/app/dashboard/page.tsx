@@ -1,7 +1,19 @@
+"use client";
+import React, { useEffect } from "react";
 import Image from "next/image";
-
+import { myAppHook } from "@/context/AppProvider";
+import { useRouter } from "next/navigation";
 
 const Dashboard: React.FC = () => {
+    const { isLoading, authToken } = myAppHook();
+    const router = useRouter();
+
+    useEffect(() => {
+        if(!authToken) {
+            router.push("/auth"); // Redirect to auth page if not authenticated
+        }
+        return
+    }, [authToken])
     return <>
         <div className="container mt-4">
         <div className="row">
