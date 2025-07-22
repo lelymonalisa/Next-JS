@@ -4,9 +4,24 @@ import Image from "next/image";
 import { myAppHook } from "@/context/AppProvider";
 import { useRouter } from "next/navigation";
 
+interface ProductType {
+    title:string,
+    description:string,
+    cost:number,
+    file:File | null,
+    bannerUrl:string | " "
+}
+
 const Dashboard: React.FC = () => {
     const { isLoading, authToken } = myAppHook();
     const router = useRouter();
+    const [formData, setFormData] = React.useState<ProductType>({
+        title: "",
+        description: "",
+        cost: 0,
+        file: null,
+        bannerUrl: " "
+    });
 
     useEffect(() => {
         if(!authToken) {
@@ -22,13 +37,35 @@ const Dashboard: React.FC = () => {
                 <div className="card p-4">
                     <h4>Add Product</h4>
                     <form>
-                        <input className="form-control mb-2" name="title" placeholder="Title" required />
-                        <input className="form-control mb-2" name="description" placeholder="Description" required />
-                        <input className="form-control mb-2" name="cost" placeholder="Cost" type="number" required />
+                        <input className="form-control mb-2" 
+                            name="title" 
+                            placeholder="Title" 
+                            required 
+                        />
+                        <input className="form-control mb-2" 
+                            name="description" 
+                            placeholder="Description" 
+                            required 
+                        />
+                        <input className="form-control mb-2" 
+                            name="cost" 
+                            placeholder="Cost" 
+                            type="number" 
+                            required 
+                        />
                         <div className="mb-2">
-                            {/* <Image src="#" alt="Preview" id="bannerPreview" width={100} height={100} style={{ display: "none" }} /> */}
+                            <Image src="#" 
+                            alt="Preview" 
+                            id="bannerPreview" 
+                            width={100} 
+                            height={100} 
+                            style={{ display: "none" }} 
+                        />
                         </div>
-                        <input className="form-control mb-2" type="file" id="bannerInput" />
+                        <input className="form-control mb-2" 
+                            type="file" 
+                            id="bannerInput" 
+                        />
                         <button className="btn btn-primary" type="submit">Add Product</button>
                     </form>
                 </div>

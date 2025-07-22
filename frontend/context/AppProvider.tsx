@@ -18,6 +18,11 @@ const AppContext = createContext<AppProviderType | undefined>(undefined);
 
 const API_URL = `${process.env.NEXT_PUBLIC_API_URL}`;
 
+console.log(API_URL);
+console.log(`${API_URL}/register`)
+
+console.log(process.env.NEXT_PUBLIC_API_URL);
+
 export const AppProvider =({
   children,
 }: {
