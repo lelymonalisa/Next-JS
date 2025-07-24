@@ -30,8 +30,11 @@ class ProductController extends Controller
     {
         //
         $data = $request->validate([
-            'title' => 'requied'
+            'title' => 'required'
         ]);
+
+        $data['description'] = $request->description;
+        $data['cost'] = $request->cost;
 
         $data['user_id'] = auth()->user()->id;
         if($request->hasFile('banner_image')) {
