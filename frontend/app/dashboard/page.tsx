@@ -27,6 +27,7 @@ const Dashboard: React.FC = () => {
         banner_image: null
     });
 
+    // page load when authtoken
     useEffect(() => {
         if(!authToken) {
             router.push("/auth"); // Redirect to auth page if not authenticated
@@ -34,6 +35,7 @@ const Dashboard: React.FC = () => {
         return
     }, [authToken])
 
+    // on change from inpu
     const handleOnChangeEvent = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
             if (e.target.files){
                 // file uploaded
@@ -51,6 +53,7 @@ const Dashboard: React.FC = () => {
             }
         }
 
+        // form submission handler
         const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
             e.preventDefault();
 
@@ -62,13 +65,41 @@ const Dashboard: React.FC = () => {
                         "Content-Type": "multipart/form-data"
                     }
                 });
-                toast.success("Product added successfully!");
+
+                if(response.data.status){
+                    toast.success(response.data.message)
+                    setFormData({
+                        title: "",
+                        description: "",
+                        cost: 0,
+                        file: "",
+                        banner_image: null
+                    })
+                    if(fileRef.current) {
+                        fileRef.current.value = ""; // Reset file input
+                    }
+                }
                 console.log("Response:", response.data);
             } catch (error) {
                 console.error("Error submitting form:", error);
                 toast.error("Failed to add product.");
             }
         }
+
+        const fetchAllProducts = () => {
+            try{
+                const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/products`, {
+                    headers: {
+                        Authorization: `Bearer ${authToken}`
+                    }
+                });
+            } catch (error) {
+                console.error("Error fetching products:", error);
+                toast.error("Failed to fetch products.");
+            }
+        }
+
+
     return <> 
         <div className="container mt-4">
         <div className="row">
