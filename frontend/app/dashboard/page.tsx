@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 import Swal from "sweetalert2";
 
 interface ProductType {
+    id?: number,
     title:string,
     description:string,
     cost:number,
@@ -19,6 +20,7 @@ const Dashboard: React.FC = () => {
     const { isLoading, authToken } = myAppHook();
     const router = useRouter();
     const fileRef = React.useRef<HTMLInputElement>(null);
+    const [products, setProducts] = React.useState<ProductType[]>([]);
     const [formData, setFormData] = React.useState<ProductType>({
         title: "",
         description: "",
@@ -31,8 +33,9 @@ const Dashboard: React.FC = () => {
     useEffect(() => {
         if(!authToken) {
             router.push("/auth"); // Redirect to auth page if not authenticated
+            return;
         }
-        return
+        fetchAllProducts();
     }, [authToken])
 
     // on change from inpu
@@ -86,13 +89,14 @@ const Dashboard: React.FC = () => {
             }
         }
 
-        const fetchAllProducts = () => {
+        const fetchAllProducts = async () => {
             try{
                 const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/products`, {
                     headers: {
                         Authorization: `Bearer ${authToken}`
                     }
                 });
+                setProducts(response.data.products);
             } catch (error) {
                 console.error("Error fetching products:", error);
                 toast.error("Failed to fetch products.");
@@ -166,16 +170,20 @@ const Dashboard: React.FC = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>1</td>
-                            <td>Sample Product</td>
+                        {
+                            products.map((singleProduct, index) => (
+                                                        <tr>
+                            <td>{singleProduct.id}</td>
+                            <td>{singleProduct.title}</td>
                             {/* <td><Image src="#" alt="Product" width={50} height={50} /></td> */}
-                            <td>$100</td>
+                            <td>{singleProduct.cost}</td>
                             <td>
-                                <button className="btn btn-warning btn-sm me-2">Edit</button>
+                                <button className="btn btn-warning btn-sm me-2"></button>
                                 <button className="btn btn-danger btn-sm">Delete</button>
                             </td>
                         </tr>
+                            ))
+                        }
                     </tbody>
                 </table>
             </div>
