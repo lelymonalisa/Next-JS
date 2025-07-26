@@ -9,11 +9,11 @@ import Swal from "sweetalert2";
 
 interface ProductType {
     id?: number,
-    title:string,
-    description:string,
-    cost:number,
-    file:string,
-    banner_image:File | null
+    title?:string,
+    description?:string,
+    cost?:number,
+    file?:string,
+    banner_image?:File | null
 }
 
 const Dashboard: React.FC = () => {
@@ -21,6 +21,7 @@ const Dashboard: React.FC = () => {
     const router = useRouter();
     const fileRef = React.useRef<HTMLInputElement>(null);
     const [products, setProducts] = React.useState<ProductType[]>([]);
+    const [isEdit, setIsEdit] = React.useState<boolean>(false);
     const [formData, setFormData] = React.useState<ProductType>({
         title: "",
         description: "",
@@ -62,27 +63,44 @@ const Dashboard: React.FC = () => {
 
             console.log("Form Data Submitted:", formData);
             try {
-                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/products`, formData, {
-                    headers: {
-                        Authorization: `Bearer ${authToken}`,
-                        "Content-Type": "multipart/form-data"
-                    }
-                });
+                if(isEdit) {
+                    // edit operation
+                    const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/products/${formData.id}`, {
+                        ...formData,
+                        "_method": "PUT" 
+                    }, {
+                        headers: {
+                            Authorization: `Bearer ${authToken}`,
+                            "Content-Type": "multipart/form-data"
+                        }
+                    });
+                    toast.success(response.data.message);
+                    fetchAllProducts();
+                } else {
+                    // add operation
+                    const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/products/${formData.id}`, formData, {
+                        headers: {
+                            Authorization: `Bearer ${authToken}`,
+                            "Content-Type": "multipart/form-data"
+                        }
+                    });
 
-                if(response.data.status){
-                    toast.success(response.data.message)
-                    setFormData({
-                        title: "",
-                        description: "",
-                        cost: 0,
-                        file: "",
-                        banner_image: null
+                    if(response.data.status){
+                        toast.success(response.data.message)
+                        setFormData({
+                            title: "",
+                            description: "",
+                            cost: 0,
+                            file: "",
+                            banner_image: null
                     })
                     if(fileRef.current) {
                         fileRef.current.value = ""; // Reset file input
                     }
                 }
                 console.log("Response:", response.data);
+                toast.success("Product added successfully!");
+                }
             } catch (error) {
                 console.error("Error submitting form:", error);
                 toast.error("Failed to add product.");
@@ -110,7 +128,7 @@ const Dashboard: React.FC = () => {
 
             <div className="col-md-6">
                 <div className="card p-4">
-                    <h4>Add Product</h4>
+                    <h4>{isEdit ? "Edit" : "Add"} Product</h4>
                     <form onSubmit={ handleFormSubmit}>
                         <input className="form-control mb-2" 
                             name="title" 
@@ -153,7 +171,7 @@ const Dashboard: React.FC = () => {
                             ref={ fileRef }
                             onChange={ handleOnChangeEvent }
                         />
-                        <button className="btn btn-primary" type="submit">Add Product</button>
+                        <button className="btn btn-primary" type="submit">{isEdit ? "Edit" : "Add"} Product</button>
                     </form>
                 </div>
             </div>
@@ -172,16 +190,28 @@ const Dashboard: React.FC = () => {
                     <tbody>
                         {
                             products.map((singleProduct, index) => (
-                                                        <tr>
-                            <td>{singleProduct.id}</td>
-                            <td>{singleProduct.title}</td>
-                            {/* <td><Image src="#" alt="Product" width={50} height={50} /></td> */}
-                            <td>{singleProduct.cost}</td>
-                            <td>
-                                <button className="btn btn-warning btn-sm me-2"></button>
-                                <button className="btn btn-danger btn-sm">Delete</button>
-                            </td>
-                        </tr>
+                            <tr key={index}>
+                                <td>{singleProduct.id}</td>
+                                <td>{singleProduct.title}</td>
+                                <td>{
+                                        singleProduct.banner_image ? (<img src={singleProduct.banner_image} alt="Product" width={50} height={50} />) : "No Image"
+                                    }
+                                </td>
+                                <td>{singleProduct.cost}</td>
+                                <td>
+                                    <button className="btn btn-warning btn-sm me-2" onClick={() => {
+                                        setFormData({
+                                            id: singleProduct.id,
+                                            title: singleProduct.title,
+                                            cost: singleProduct.cost,
+                                            description: singleProduct.description,
+                                            file: singleProduct.banner_image,
+                                        })
+                                        setIsEdit(true);
+                                    }}>Edit</button>
+                                    <button className="btn btn-danger btn-sm">Delete</button>
+                                </td>
+                             </tr>
                             ))
                         }
                     </tbody>
