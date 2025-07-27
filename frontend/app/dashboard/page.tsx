@@ -58,7 +58,7 @@ const Dashboard: React.FC = () => {
         }
 
         // form submission handler
-        const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
             e.preventDefault();
 
             console.log("Form Data Submitted:", formData);
@@ -107,7 +107,7 @@ const Dashboard: React.FC = () => {
             }
         }
 
-        const fetchAllProducts = async () => {
+    const fetchAllProducts = async () => {
             try{
                 const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/products`, {
                     headers: {
@@ -121,6 +121,42 @@ const Dashboard: React.FC = () => {
             }
         }
 
+    const handleDeleteProduct = async (id: number) => {
+        try{
+            Swal.fire({
+            title: "Are you sure?",
+            text: "You won't be able to revert this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, delete it!"
+            }).then(async(result) => {
+            if (result.isConfirmed) {
+                try {
+                    const response = await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/products/${id}`, {
+                        headers: {
+                            Authorization: `Bearer ${authToken}`
+                        }
+                    });
+                    if(response.data.status) {
+                        toast.success("Product deleted successfully!");
+                        // Swal.fire({
+                        // title: "Deleted!",
+                        // text: "Your file has been deleted.",
+                        // icon: "success"
+                        // });
+                        // fetchAllProducts(); // Refresh product list
+                    }
+                } catch (error) {
+                    console.log("Error deleting product:", error);
+                }
+            }
+            });
+        } catch(error) {
+            console.log("Error deleting product:", error);
+        }
+    }
 
     return <> 
         <div className="container mt-4">
@@ -209,7 +245,9 @@ const Dashboard: React.FC = () => {
                                         })
                                         setIsEdit(true);
                                     }}>Edit</button>
-                                    <button className="btn btn-danger btn-sm">Delete</button>
+                                    <button className="btn btn-danger btn-sm" onClick={ () => 
+                                        handleDeleteProduct(singleProduct.id)
+                                    }>Delete</button>
                                 </td>
                              </tr>
                             ))
